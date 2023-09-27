@@ -7,7 +7,6 @@ import (
 
 	"github.com/bitfield/script"
 	"github.com/pterm/pterm"
-	"github.com/spf13/viper"
 )
 
 func installNetclient() {
@@ -44,15 +43,14 @@ func installNetclient() {
 	} else {
 		pterm.Println("enrollment key not defined")
 	}
-	nodes := viper.New()
-	nodes.SetConfigFile("/etc/netclient/nodes.yml")
-	if err := nodes.ReadInConfig(); err != nil {
+	nodeID, err := script.Exec("/tmp/nmctl node list --output json").JQ(".[]").JQ(".id").String()
+	if err != nil {
 		pterm.Println("error reading netclient config:", err)
+		return
 	}
-	nodeID := nodes.GetString("netmaker.commonnode.id")
-	hostID := nodes.GetString("netmaker.commonnode.id")
-	if hostID == "" {
-		pterm.Println("something went wrong joining network, unable to create default host")
+	hostID, err := script.Exec("/tmp/nmctl node list --output json").JQ(".[]").JQ(".hostid").String()
+	if err != nil {
+		pterm.Println("error reading netclient config:", err)
 		return
 	}
 	pterm.Println("setting default node (nmctl host update " + hostID + " --default)")

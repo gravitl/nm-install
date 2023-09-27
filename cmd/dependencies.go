@@ -42,7 +42,7 @@ func installDependencies() {
 		composeRequired = true
 	}
 	if dockerRequired || composeRequired {
-		if distro == "ubuntu" && distro == "debian" {
+		if distro == "ubuntu" || distro == "debian" {
 			installDocker()
 		} else {
 			installDockerCE(distro)
@@ -166,7 +166,7 @@ func oldKernel() bool {
 
 func installWireguard() {
 	pterm.Println("installing wireguard kernel module")
-	if _, err := script.Exec("yum install -y elrepo-release elep-release").Stdout(); err != nil {
+	if _, err := script.Exec("yum install -y elrepo-release epel-release").Stdout(); err != nil {
 		panic(err)
 	}
 	if _, err := script.Exec("yum install -y kmod-wireguard wireguard-tools").Stdout(); err != nil {
