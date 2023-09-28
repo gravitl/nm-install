@@ -56,10 +56,19 @@ func installNetmaker() {
 		netEnv["LICENSE_KEY"] = license
 		netEnv["SERVER_IMAGE_NAME"] = latest + "-ee"
 	}
-	if err := godotenv.Write(netEnv, "./netmaker.env"); err != nil {
+	// docker compose does not like quotes around strings
+	// remove quotes and write to .env
+	marhalled, err := godotenv.Marshal(netEnv)
+	if err != nil {
 		panic(err)
 	}
-	os.Symlink("netmaker.env", ".env")
+	replaced, err := script.Echo(marhalled).Replace("\"", "").String()
+	if err != nil {
+		panic(err)
+	}
+	if err := os.WriteFile("./.env", []byte(replaced), 0700); err != nil {
+		panic(err)
+	}
 	//Fetch/Update certs
 	pterm.Println("\nGetting certificates")
 	//ensure docker daemon is running
