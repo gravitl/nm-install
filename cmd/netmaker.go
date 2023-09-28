@@ -66,7 +66,10 @@ func installNetmaker() {
 	if err != nil {
 		panic(err)
 	}
-	if err := os.WriteFile("./.env", []byte(replaced), 0700); err != nil {
+	if err := os.WriteFile("./netmaker.env", []byte(replaced), 0700); err != nil {
+		panic(err)
+	}
+	if err := os.Symlink("./netmaker.env", ".env"); err != nil {
 		panic(err)
 	}
 	//Fetch/Update certs
