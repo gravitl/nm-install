@@ -158,7 +158,7 @@ func oldKernel() bool {
 	if major < 5 {
 		return true
 	}
-	if major == 5 && minor < 6 {
+	if major == 5 && minor < 4 {
 		return true
 	}
 	return false
