@@ -113,7 +113,7 @@ func installDockerCE(distro string) {
 		if err != nil {
 			panic(err)
 		}
-		_, err = script.Exec("dnf-config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo").Stdout()
+		_, err = script.Exec("dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo").Stdout()
 		if err != nil {
 			panic(err)
 		}

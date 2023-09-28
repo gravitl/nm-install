@@ -87,6 +87,7 @@ func init() {
 
 	rootCmd.PersistentFlags().BoolVarP(&pro, "pro", "p", false, "install pro version")
 	rootCmd.PersistentFlags().StringVarP(&domain, "domain", "d", "", "custom domain to use")
+	rootCmd.PersistentFlags().StringVarP(&email, "email", "e", "", "email to use for certificate registration")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.

@@ -23,13 +23,58 @@ func setInstallVars() {
 	if masterkey == "" {
 		masterkey = randomString(32)
 	}
-	pterm.Println("masterkey set: ", masterkey)
 	mqUsername = "netmaker"
 	mqPassword = randomString(32)
-	pterm.Println("mq creditials:", mqUsername, mqPassword)
 	turnUsername = "netmaker"
 	turnPassword = randomString(32)
-	pterm.Println("turn creditials:", turnUsername, turnPassword)
+	getInterractiveInput(askDomain, ip)
+	response := ""
+	for {
+		response = getResponse()
+		switch response {
+		case "Yes":
+			return
+		case "No, Exit":
+			os.Exit(1)
+		case "No, StartOver":
+			askDomain = true
+			email = ""
+			getInterractiveInput(askDomain, ip)
+		}
+	}
+}
+
+func getResponse() string {
+	pterm.Print("\nThe following subdomains will be used:\n\n")
+	pterm.Printf("dashboard.%s\n", domain)
+	pterm.Printf("api.%s\n", domain)
+	pterm.Printf("broker.%s\n", domain)
+	pterm.Printf("turn.%s\n", domain)
+	pterm.Printf("turnapi.%s\n", domain)
+	if pro {
+		pterm.Printf("prometheus.%s\n", domain)
+		pterm.Printf("netmaker-exporter.%s\n", domain)
+		pterm.Printf("grafana.%s\n", domain)
+	}
+	pterm.Println("\nemail for certificate registration:\n", email)
+	if pro {
+		pterm.Println("\nPro tenent id:\n", tenantID)
+		pterm.Println("Pro license key:\n", license)
+	}
+	pterm.Print("\n\n")
+	prompt := pterm.DefaultInteractiveSelect
+	prompt.DefaultText = "Confirm everthing is correct"
+	prompt.Options = []string{"Yes", "No, Exit", "No, StartOver"}
+	prompt.DefaultOption = "Yes"
+	response, err := prompt.Show()
+	if err != nil {
+		panic(err)
+	}
+	return response
+}
+
+func getInterractiveInput(askDomain bool, ip string) {
+	var err error
 	if askDomain {
 		pterm.Println("\nWould you like to use your own domain for netmaker, or an auto-generated domain?")
 		pterm.Println("\nTo use your own domain, add a Wildcard DNS record (e.x: *.netmaker.example.com) pointing to", ip)
@@ -44,29 +89,12 @@ func setInstallVars() {
 			}
 		}
 	}
-	pterm.Print("\nThe following subdomains will be used:\n\n")
-	pterm.Printf("dashboard.%s\n", domain)
-	pterm.Printf("api.%s\n", domain)
-	pterm.Printf("broker.%s\n", domain)
-	pterm.Printf("turn.%s\n", domain)
-	pterm.Printf("turnapi.%s\n", domain)
-	if pro {
-		pterm.Printf("prometheus.%s\n", domain)
-		pterm.Printf("netmaker-exporter.%s\n", domain)
-		pterm.Printf("grafana.%s\n", domain)
-	}
-	pterm.Print("\n\n")
-	ok, err := pterm.DefaultInteractiveConfirm.WithDefaultValue(true).Show()
-	if err != nil {
-		panic(err)
-	}
-	if !ok {
-		os.Exit(1)
-	}
-	pterm.Print("\nEnter email address for certificate registration\n\n")
-	email, err = pterm.DefaultInteractiveTextInput.WithMultiLine(false).Show()
-	if err != nil {
-		panic(err)
+	if email == "" {
+		pterm.Print("\nEnter email address for certificate registration\n\n")
+		email, err = pterm.DefaultInteractiveTextInput.WithMultiLine(false).Show()
+		if err != nil {
+			panic(err)
+		}
 	}
 	if pro {
 		pterm.Println("\nProvide Details for Pro installation")
