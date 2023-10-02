@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/bitfield/script"
@@ -119,10 +120,25 @@ func getLatestRelease() string {
 
 func testConnection() {
 	pterm.Println("\nTesting Server setup for https://api." + domain + "/api/server/status")
+	for i := 1; i < 9; i++ {
 
-	if _, err := script.Get("https://api." + domain + "/api/server/status").Stdout(); err != nil {
-		pterm.Println("unable to connect to server, please investigate")
-		pterm.Println("Exiting...")
-		os.Exit(1)
+		response, err := script.Get("https://api." + domain + "/api/server/status").String()
+		if err != nil {
+			if i == 8 {
+				pterm.Println("Caddy is having an issue setting up certificates, please investigate (docke logs cadd)")
+				pterm.Println("Exiting...")
+				os.Exit(1)
+			}
+			if strings.Contains(response, "legitimacy of server") {
+				pterm.Println("certificates not yet configured, retrying ...")
+			} else if strings.Contains(response, "left intact") {
+				pterm.Println("Certificates OK")
+				break
+			} else {
+				secs := i*5 + 10
+				pterm.Println("issue establishing connection, retrying in ", secs, " seconds...")
+				time.Sleep(time.Second * time.Duration(i*5+10))
+			}
+		}
 	}
 }
