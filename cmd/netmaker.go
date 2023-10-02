@@ -23,7 +23,6 @@ func installNetmaker() {
 	baseURL := "https://raw.github.com/gravitl/netmaker/" + latest
 	getFile(baseURL, "/compose/docker-compose.yml", "./docker-compose.yml")
 	getFile(baseURL, "/scripts/netmaker.default.env", "./netmaker.default.env")
-	getFile(baseURL, "/scripts/nm-certs.sh", "./nm-certs.sh")
 	getFile(baseURL, "/docker/mosquitto.conf", "./mosquitto.conf")
 	getFile(baseURL, "/docker/wait.sh", "./wait.sh")
 	if pro {
@@ -33,7 +32,6 @@ func installNetmaker() {
 		getFile(baseURL, "/docker/Caddyfile", "./Caddyfile")
 	}
 	os.Chmod("wait.sh", 0700)
-	os.Chmod("nm-certs.sh", 0700)
 	netEnv, err := godotenv.Read("./netmaker.default.env")
 	if err != nil {
 		panic(err)
@@ -72,19 +70,9 @@ func installNetmaker() {
 	if err := os.Symlink("./netmaker.env", ".env"); err != nil {
 		panic(err)
 	}
-	//Fetch/Update certs
-	pterm.Println("\nGetting certificates")
 	//ensure docker daemon is running
 	_, err = script.Exec("systemctl start docker").Stdout()
 	if err != nil {
-		panic(err)
-	}
-	//fix nm-cert.sh  remove -it from docker run -it --rm .....
-	if _, err := script.File("./nm-certs.sh").Replace("-it", "").WriteFile("./certs.sh"); err != nil {
-		panic(err)
-	}
-	os.Chmod("./certs.sh", 0700)
-	if _, err := script.Exec("./certs.sh").Stdout(); err != nil {
 		panic(err)
 	}
 	pterm.Println("\nStarting containers...")
