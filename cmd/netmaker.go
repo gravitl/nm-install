@@ -125,7 +125,7 @@ func testConnection() {
 		response, err := script.Get("https://api." + domain + "/api/server/status").String()
 		if err != nil {
 			if i == 8 {
-				pterm.Println("Caddy is having an issue setting up certificates, please investigate (docke logs cadd)")
+				pterm.Println("Caddy is having an issue setting up certificates, please investigate (docker logs caddy)")
 				pterm.Println("Exiting...")
 				os.Exit(1)
 			}
