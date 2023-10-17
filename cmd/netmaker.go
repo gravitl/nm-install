@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/bitfield/script"
@@ -23,7 +24,6 @@ func installNetmaker() {
 	baseURL := "https://raw.github.com/gravitl/netmaker/" + latest
 	getFile(baseURL, "/compose/docker-compose.yml", "./docker-compose.yml")
 	getFile(baseURL, "/scripts/netmaker.default.env", "./netmaker.default.env")
-	getFile(baseURL, "/scripts/nm-certs.sh", "./nm-certs.sh")
 	getFile(baseURL, "/docker/mosquitto.conf", "./mosquitto.conf")
 	getFile(baseURL, "/docker/wait.sh", "./wait.sh")
 	if pro {
@@ -33,7 +33,6 @@ func installNetmaker() {
 		getFile(baseURL, "/docker/Caddyfile", "./Caddyfile")
 	}
 	os.Chmod("wait.sh", 0700)
-	os.Chmod("nm-certs.sh", 0700)
 	netEnv, err := godotenv.Read("./netmaker.default.env")
 	if err != nil {
 		panic(err)
@@ -72,19 +71,9 @@ func installNetmaker() {
 	if err := os.Symlink("./netmaker.env", ".env"); err != nil {
 		panic(err)
 	}
-	//Fetch/Update certs
-	pterm.Println("\nGetting certificates")
 	//ensure docker daemon is running
 	_, err = script.Exec("systemctl start docker").Stdout()
 	if err != nil {
-		panic(err)
-	}
-	//fix nm-cert.sh  remove -it from docker run -it --rm .....
-	if _, err := script.File("./nm-certs.sh").Replace("-it", "").WriteFile("./certs.sh"); err != nil {
-		panic(err)
-	}
-	os.Chmod("./certs.sh", 0700)
-	if _, err := script.Exec("./certs.sh").Stdout(); err != nil {
 		panic(err)
 	}
 	pterm.Println("\nStarting containers...")
@@ -131,10 +120,25 @@ func getLatestRelease() string {
 
 func testConnection() {
 	pterm.Println("\nTesting Server setup for https://api." + domain + "/api/server/status")
+	for i := 1; i < 9; i++ {
 
-	if _, err := script.Get("https://api." + domain + "/api/server/status").Stdout(); err != nil {
-		pterm.Println("unable to connect to server, please investigate")
-		pterm.Println("Exiting...")
-		os.Exit(1)
+		response, err := script.Get("https://api." + domain + "/api/server/status").String()
+		if err != nil {
+			if i == 8 {
+				pterm.Println("Caddy is having an issue setting up certificates, please investigate (docker logs caddy)")
+				pterm.Println("Exiting...")
+				os.Exit(1)
+			}
+			if strings.Contains(response, "legitimacy of server") {
+				pterm.Println("certificates not yet configured, retrying ...")
+			} else if strings.Contains(response, "left intact") {
+				pterm.Println("Certificates OK")
+				break
+			} else {
+				secs := i*5 + 10
+				pterm.Println("issue establishing connection, retrying in ", secs, " seconds...")
+				time.Sleep(time.Second * time.Duration(i*5+10))
+			}
+		}
 	}
 }
