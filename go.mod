@@ -6,7 +6,7 @@ require (
 	github.com/bitfield/script v0.22.0
 	github.com/joho/godotenv v1.5.1
 	github.com/kr/pretty v0.3.1
-	github.com/pterm/pterm v0.12.69
+	github.com/pterm/pterm v0.12.70
 	github.com/rdegges/go-ipify v0.0.0-20150526035502-2d94a6a86c40
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.16.0
@@ -38,9 +38,9 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
-	golang.org/x/sys v0.11.0 // indirect
-	golang.org/x/term v0.11.0 // indirect
-	golang.org/x/text v0.12.0 // indirect
+	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/term v0.13.0 // indirect
+	golang.org/x/text v0.13.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	mvdan.cc/sh/v3 v3.6.0 // indirect
